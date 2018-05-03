@@ -1,0 +1,92 @@
+
+docker compose 로 web site 띄우기 
+
+	Ubuntu에서 pyenv, virtualenv, autoenv 이용하기
+	https://cjh5414.github.io/ubuntu-pyenv-virtualenv/
+
+	Docker (Compose) 활용법 - 개발 환경 구성하기
+	http://raccoonyy.github.io/docker-usages-for-dev-environment-setup/
+
+	Quickstart: Compose and Django
+	https://docs.docker.com/compose/django/
+
+	sudo docker-compose run web django-admin.py startproject composeexample .
+	sudo docker-compose run web django-admin.py startproject testproject .
+	sudo docker-compose run web django-admin.py startproject courses_mysite .
+
+	docker-compose up 으로 서버 실행 
+
+=====================================================================
+장고 온라인 강의 
+https://programmers.co.kr/learn/courses/6/
+
+==============================
+Django 프로젝트 만들기
+==============================
+
+### Django 프로젝트 생성
+	프로젝트를 만들고자 하는 폴더로 이동
+	django-admin startproject <프로젝트이름>
+### Django 서버 실행
+	앞에서 생성했던 <프로젝트이름> 디렉토리로 이동
+	python manage.py runserver
+### Django 서버 접속
+	웹브라우저(IE, chrome, firefox, safari, opera 등) 실행
+	주소창에 127.0.0.1:8000 또는 localhost:8000 입력 -> It Worked! 화면이 나오면 성공
+
+
+
+==============================
+hello world 출력하기
+==============================
+### app 만들기
+	프로젝트 폴더로 이동
+	python manage.py startapp <앱이름>
+	ls 명령어를 치면 <앱이름>이라는 디렉토리가 생성되어 있음
+### hello world를 출력하는 index 함수 만들기
+	앞에서 생성한 <앱이름> 폴더로 이동
+	views.py(\프로젝트이름\앱이름\views.py) 수정 - 페이지 요청에 대해 hello world라는 httpResponse
+### 앱에 접근할 조건을 지정하는 함수 만들기
+	\프로젝트명\프로젝트명\urls.py에 urlpatterns 수정
+### 앞서 생성한 index 함수를 실행할 조건을 지정하는 함수 만들기
+	앞서 생성한 <앱이름> 폴더로 이동
+	urls.py(\프로젝트이름\앱이름\urls.py) 파일 생성
+	urls.py에 urlpatterns로 index함수를 지정
+
+### 참고
+	app - 웹사이트를 기능별로 분류해놓은 단위
+	urlpatterns - 서버에 요청이 들어온 경우, 담당자를 지정하는 역할. url(주소, 주소에 접속하면 실행될 명령어)
+	include - 앱 접속을 위해 씁니다.
+
+
+
+==============================
+
+==============================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+==============================
+
+==============================
+
+
+
+
+
+
+
