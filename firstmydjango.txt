@@ -16,13 +16,21 @@ docker compose 로 web site 띄우기
 
 	docker-compose up 으로 서버 실행 
 
+	Deploy Django, Gunicorn, NGINX, Postgresql using Docker
+	http://ruddra.com/2016/08/14/docker-django-nginx-postgres/
+
 =====================================================================
 장고 온라인 강의 
 https://programmers.co.kr/learn/courses/6/
 
+
+
 ==============================
+장고시작하기
+==============================
+-------------------------
 Django 프로젝트 만들기
-==============================
+-------------------------
 
 ### Django 프로젝트 생성
 	프로젝트를 만들고자 하는 폴더로 이동
@@ -34,11 +42,10 @@ Django 프로젝트 만들기
 	웹브라우저(IE, chrome, firefox, safari, opera 등) 실행
 	주소창에 127.0.0.1:8000 또는 localhost:8000 입력 -> It Worked! 화면이 나오면 성공
 
-
-
-==============================
+-------------------------
 hello world 출력하기
-==============================
+-------------------------
+
 ### app 만들기
 	프로젝트 폴더로 이동
 	python manage.py startapp <앱이름>
@@ -59,10 +66,39 @@ hello world 출력하기
 	include - 앱 접속을 위해 씁니다.
 
 
-
+==============================
+모델
 ==============================
 
-==============================
+-------------------------
+app과 관련된 정보를 저장할 model
+-------------------------
+
+모델클래스는 앱 안의 models.py에 정의합니다.
+모델 class는 models.Model을 상속받아야 합니다.
+모델 class안의 멤버 변수의 field에 대한 정보는 Field types를 참고해주세요
+
+-------------------------  
+모델을 DB에 저장하기 위한 준비 과정
+-------------------------
+
+mysite/settings.py - INSTALLED_APPS 리스트에 elections(앱이름) 추가
+mysite 폴더로 이동 후 python manage.py makemigrations 입력
+python manage.py migrate로 DB에 공간 만들기
+
+문제) django 가 database (docker postgresql 이미지) 의 host 로 지정한 db 를 모른다고 실행이 안됨 
+	django.db.utils.OperationalError: could not translate host name "db" to address: Name or service not known
+	해결 >>>>
+	- https://stackoverflow.com/questions/33992867/how-do-you-perform-django-database-migrations-when-using-docker-compose
+	- https://stackoverflow.com/questions/41435014/why-am-i-unable-to-run-django-migrations-via-the-docker-compose-run-web-comman/41436850
+
+	docker-compose exec web python manage.py makemigrations
+	docker-compose exec web python3 manage.py migrate
+
+
+-------------------------
+
+-------------------------
 
 
 
@@ -79,6 +115,10 @@ hello world 출력하기
 
 
 
+
+-------------------------
+
+-------------------------
 
 ==============================
 
