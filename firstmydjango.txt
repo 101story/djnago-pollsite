@@ -1,5 +1,5 @@
 
-docker compose 로 web site 띄우기 
+docker compose 로 web site 띄우기
 
 	Ubuntu에서 pyenv, virtualenv, autoenv 이용하기
 	https://cjh5414.github.io/ubuntu-pyenv-virtualenv/
@@ -14,13 +14,13 @@ docker compose 로 web site 띄우기
 	sudo docker-compose run web django-admin.py startproject testproject .
 	sudo docker-compose run web django-admin.py startproject courses_mysite .
 
-	docker-compose up 으로 서버 실행 
+	docker-compose up 으로 서버 실행
 
 	Deploy Django, Gunicorn, NGINX, Postgresql using Docker
 	http://ruddra.com/2016/08/14/docker-django-nginx-postgres/
 
 =====================================================================
-장고 온라인 강의 
+장고 온라인 강의
 https://programmers.co.kr/learn/courses/6/
 
 
@@ -78,7 +78,7 @@ app과 관련된 정보를 저장할 model
 모델 class는 models.Model을 상속받아야 합니다.
 모델 class안의 멤버 변수의 field에 대한 정보는 Field types를 참고해주세요
 
--------------------------  
+-------------------------
 모델을 DB에 저장하기 위한 준비 과정
 -------------------------
 
@@ -86,47 +86,358 @@ mysite/settings.py - INSTALLED_APPS 리스트에 elections(앱이름) 추가
 mysite 폴더로 이동 후 python manage.py makemigrations 입력
 python manage.py migrate로 DB에 공간 만들기
 
-문제) django 가 database (docker postgresql 이미지) 의 host 로 지정한 db 를 모른다고 실행이 안됨 
+________
+문제) django 가 database (docker postgresql 이미지) 의 host 로 지정한 db 를 모른다고 실행이 안됨
 	django.db.utils.OperationalError: could not translate host name "db" to address: Name or service not known
-	해결 >>>>
+
+>>>> 해결
 	- https://stackoverflow.com/questions/33992867/how-do-you-perform-django-database-migrations-when-using-docker-compose
 	- https://stackoverflow.com/questions/41435014/why-am-i-unable-to-run-django-migrations-via-the-docker-compose-run-web-comman/41436850
 
 	docker-compose exec web python manage.py makemigrations
 	docker-compose exec web python3 manage.py migrate
 
+docker-compose 사용에서 postgres 서비스로 접속하기
 
--------------------------
-
--------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	sudo docker-compose exec db psql -U postgres
+________
 
 
 
 -------------------------
+장고 어드민
+-------------------------
+
+##### admin으로 접속
+	1. admin 사용자 만들기
+		프로젝트 폴더로 이동
+		python manage.py createsuperuser 실행
+		유저 이름과 email, password 설정
+	2. 서버 실행
+		python manage.py runserver
+	3. admin으로 접속
+		브라우저에서 admin:localhost:8000/admin으로 접속
+		1에서 만든 사용자로 접속
+
+##### Candidate 등록
+	1. app폴더의 admin.py에 model에서 정의한 Candidate를 regist
+	2. 브라우저를 새로고침 하면 Candidate가 반영됩니다.
+	3. Candidate - ADD CANDIDATE - 내용을 추가하고 SAVE -> object가 추가됩니다.
+		#C\Code\mysite\elections\admin.py
+		from django.contrib import admin
+		from .models import Candidate
+
+		admin.site.register(Candidate)
+
+===== object를 구분하는 방법
+	python에서는 object를 표현하는 문자열을 정의할 때는 __str__메소드를 오버라이딩합니다. 예를 들어 위에서 등록한 Candidate의 이름으로 object를 표현하고 싶은 경우,
+		#C\Code\mysite\elections\models.py
+		from django.db import models
+
+		class Candidate(models.Model):
+		    ...
+		    def __str__(self):
+		        return self.name #object를 출력하면 name이 보입니다.
+	로 수정한 후, 브라우저를 새로고침 하면 후보자 이름이 보입니다.
+
 
 -------------------------
+데이터 보여주기
+-------------------------
+
+##### DB에 모델이 저장된 구조
+	Candidate 테이블에서 각 데이터 필드는 column(열)으로, 각 Candidate의 정보는 row(행)으로 저장되어 있습니다.
+
+#####데이터에 접근하는 방법
+	Candidate 테이블에 등록한 정보를 보기 위해서는
+
+	#C\Code\mysite\elections\views.py
+	...
+	from .models import Candidate #models에 정의된 Candidate를 import
+
+	def index(request):
+	    candidates = Candidate.objects.all() #Candidate에 있는 모든 객체를 불러옵니다
+	    str = "" #마지막에 return해 줄 문자열입니다.
+	    for candidate in candidates:
+	        str += "{}기호 {}번 ({})<BR>".format(candidate.name, candidate.party_number, candidate.area) #<BR>은 html에서 다음 줄로 이동하기 위해 쓰입니다.
+	        str += candidate.introduction + "<P>" #<P>는 html에서 단락을 바꾸기 위해 쓰입니다.
+	    return HttpResponse(str)
+
+
+-------------------------
+장고 shell
+-------------------------
+
+##### SHELL - 직접 DB에 요청을 하는 다른 방법
+	python manage.py shell
+
+##### DB에 요청하기
+	1. 기본 - 사용할 모델 클래스 import
+		>>> from elections.models import Candidate
+	2. 모든 객체 불러오기 - all()
+		>>> Candidate.objects.all()
+	3. 새 객체 생성하고 저장하기 - Model.save()
+		>>> new_candidate = Candidate(name = "루비오") #생성만 한 상태. 아직 저장되지 않음
+		>>> new_candidate.save() #new_candidate가 DB에 저장됨
+	4. 특정 조건을 만족하는 객체 불러오기 - filter()
+		>>> no1 = Candidate.objects.filter(party_number = 1) #party_number = 1인 객체를 리스트 형태로 return
+		>>> no1[0].party_number #리스트 형태이기 때문에 index로 접근
+		>>> no1[0].name
+
+	이번 동영상에서 쓰인 script 전체
+		>>> from elections.models import Candidate
+		>>> Candidate.objects.all()
+		[<Candidate: 힐러리>, <Candidate: 트럼프>]
+		>>> new_candidate = Candidate(name = "루비오")
+		>>> Candidate.objects.all() #아직 "루비오"가 DB에 저장되지 않음.
+		[<Candidate: 힐러리>, <Candidate: 트럼프>]
+		>>> new_candidate.save() # 이제 "루비오"가 DB에 저장되었습니다
+		>>> Candidate.objects.all()
+		[<Candidate: 힐러리>, <Candidate: 트럼프>, <Candidate: 루비오>]
+		>>> no1 = Candidate.objects.filter(party_number = 1)
+		>>> no1
+		[<Candidate: 힐러리>]
+		>>> no1[0].party_number
+		1
+		>>> no1[0].name
+		'힐러리'
+		>>> no1[0].introduction
+		'미국 최초의 여자 대통령이 되겠습니다.'
+
+
 
 ==============================
-
+템플릿
 ==============================
 
+-------------------------
+템플릿으로 html 불러오기
+-------------------------
+1. 서버 실행 - python manage.py runserver
+2. 브라우저에서 localhost:8000으로 접속
+3. HTML 소스보기
+	1. windows
+	- Internet Explore :
+		마우스 우클릭 - 소스보기
+		Ctrl + U
+	- Chrome :
+		마우스 우클릭 - 페이지 소스보기
+		상단 메뉴바에 보기 - 소스 또는
+		Ctrl+U
+	- Firefox :
+		마우스 우클릭 - 페이지 소스
+		Ctrl + U
+
+	2. OS X
+	- Safari : [Safari - 환경설정 - 고급 - 하단의 메뉴 막대에서 개발자용 메뉴 보기 체크] 필수
+		마우스 우클릭 - 페이지 소스보기
+		Command + Option + I
+	- Chrome :
+		마우스 우클릭 - 페이지 소스보기
+		상단 메뉴바에 보기 - 개발자 정보 - 소스 보기
+		Command + Option + U
+	- Firefox :
+		마우스 우클릭 - 페이지 소스
+		Command + U
+	4. 템플릿 추가하기
+	- 앱(elecetions) 폴더 아래에 templates 폴더 생성 (C\Code\mysite\elections\templates)
+	- templates 폴더 아래 elecetions 폴더 생성(C\Code\mysite\elections\templates\elections)
+	- elecetions 폴더 아래 index.html 파일 생성 (C\Code\mysite\elections\templates\elections\index.html)
+		---> template 폴더안에 각각의 폴더를 만들어서 동일명의 html 파일이 해깔리지 않도록 함
+	- index.html 과 views.py 수정
+		<!-- C\Code\mysite\elections\templates\elections\index.html -->
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+		  <title>선거 후보</title>
+		  <meta charset="utf-8">
+		  <meta name="viewport" content="width=device-width, initial-scale=1">
+		  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+		  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		</head>
+		<body>
+		<div class="container">
+		    <table class="table table-striped">
+		        <thead>
+		        <tr>
+		            <td><B>이름</B></td>
+		            <td><B>소개</B></td>
+		            <td><B>출마지역</B></td>
+		            <td><B>기호</B></td>
+		        </tr>
+		        </thead>
+		        <tbody>
+		        <tr>
+		            <td>가후보</td>
+		            <td>후보입니다.</td>
+		            <td>우리나라</td>
+		            <td>기호1번</td>
+		        </tr>
+		        <tr>
+		            <td>나후보</td>
+		            <td>후보입니다.</td>
+		            <td>우리나라</td>
+		            <td>기호2번</td>
+		        </tr>
+		        <tbody>
+		    </table>
+		</body>
+		# C\Code\mysite\elections\views.py
+
+		from django.shortcuts import render
+		from django.http import HttpResponse
+
+		from .models import Candidate
+
+		def index(request):
+		    candidates = Candidate.objects.all()
+		    return render(request, 'elections/index.html')
+	브라우저를 새로고침 하면 수정이 반영됩니다.
+
+
+-------------------------
+템플릿에 정보 채우기
+-------------------------
+
+1. views.py에서 DB에 있는 후보 정보를 html에 전달
+	# C\Code\mysite\elections\views.py
+
+	from django.shortcuts import render
+	from django.http import HttpResponse
+
+	from .models import Candidate
+
+	def index(request):
+	    candidates = Candidate.objects.all()
+	    context = {'candidates' : candidates} #context에 모든 후보에 대한 정보를 저장
+	    return render(request, 'elections/index.html', context) # context로 html에 모든 후보에 대한 정보를 전달
+
+2. index.html에서는 반복문을 돌며 전달받은 후보 정보를 보여줍니다
+	<!-- C\Code\mysite\elections\template\elections\index.html -->
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+	  <title>선거 후보</title>
+	  <meta charset="utf-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+	<div class="container">
+	    <table class="table table-striped">
+	        <thead>
+	        <tr>
+	            <td><B>이름</B></td>
+	            <td><B>소개</B></td>
+	            <td><B>출마지역</B></td>
+	            <td><B>기호</B></td>
+	        </tr>
+	        </thead>
+	        <!-- 이 부분이 바뀌었습니다 -->
+	        <tbody>
+	        {% for candidate in candidates %}
+	        <tr>
+	            <td> {{ candidate.name }} </td>
+	            <td> {{ candidate.introduction }} </td>
+	            <td> {{ candidate.area }} </td>
+	            <td>기호 {{ candidate.party_number }} 번</td>
+	        </tr>
+	        {% endfor %}
+	        <!-- 여기까지 -->
+	        <tbody>
+	    </table>
+	</body>
+
+
+==============================
+MVC 패턴
+==============================
+
+MVC 패턴(Model View Controller Pattern)
+조율, 데이터, 화면으로 프로그램을 구성하는 방식
+
+Model(데이터) - models.py
+	Candidate 클래스의 형식대로 데이터를 DB에 저장, 불러옴
+View(화면) - templates
+	화면에 어떤 장면을 보여줄지를 결정
+Controller(조율) - views.py
+	Candidate 모델에서 데이터를 읽어, index.html에 전달
+
+! Django에서는 controller(조율)를 views.py에서 담당하고, View(화면)를 templates에서 담당합니다. 헷갈리지 않게 주의하세요.
+
+
+==============================
+기능 추가하기
+==============================
+
+-------------------------
+여론조사 모델
+-------------------------
+models.py에는 모델 클래스를 여러 개 정의할 수 있고, 모델 간의 관계를 나타낼 수 있습니다.
+
+1. 새로운 모델을 models.py에 정의합니다.
+	# C:\Code\mysite\elections\models.py
+
+	# 기존 코드 유지
+
+	class Poll(models.Model):
+	    start_date = models.DateTimeField()
+	    end_date = models.DateTimeField()
+	    area = models.CharField(max_length = 15)
+
+	class Choice(models.Model):
+	    poll = models.ForeignKey(Poll) #Poll 모델의 id를 이용
+	    candidate = models.ForeignKey(Candidate)
+	    votes = models.IntegerField(default = 0)
+
+2. admin에서 Poll 모델을 사용하기 위해, admin.py에 Poll을 등록(regist)합니다.
+	# C:\Code\mysite\elections\admin.py
+
+	from django.contrib import admin
+	from .models import Candidate, Poll
+
+
+	admin.site.register(Candidate)
+	admin.site.register(Poll)
+
+3. 모델 등록
+	migration 파일을 만든 후 - migration 파일을 DB에 반영 - runserver 과정을 밟습니다.
+
+	powershell 등에서 manage.py가 있는 디렉토리로 이동 후,
+
+	python manage.py makemigrations
+	python manage.py migrate
+	python manage.py runserver
+	브라우저에서 localhost:8000/admin으로 접속하면 Poll을 등록할 수 있습니다.
+
+* 필드 설명
+
+	DateTimeField
+		date(날짜)와 time(시간)을 나타내며, python의 datetime.datetime 인스턴스로 표현됩니다.
+
+	CharField
+		string을 나타내며, 필수 인자 max_length가 있습니다.
+		길이가 긴 문자열을 저장하려면 TextField 등을 쓰세요.
+
+		CharField.max_length : 해당 필드의 최대길이를 설정합니다. 예를 들어 5로 설정하면 5글자 이하로만 저장할 수 있습니다.
+
+	IntegerField
+		정수를 나타냅니다.
+		이 필드는 Django가 지원하는 모든 데이터 베이스에서 -2147483648에서 2147483647까지의 정수를 안전하게 저장합니다.
+		더 큰 정수는 BigIntegerField 등을 이용하세요.
+
+	ForeignKey
+		한 모델에서 다른 모델을 이용할 때에 씁니다(보통 many-to-one 관계 모델에서 이용합니다).
+		영상에서도 여론조사(Poll) id 하나에 여러 개의 [후보-득표수]를 저장합니다.
 
 
 
 
 
 
+-------------------------
+
+-------------------------
