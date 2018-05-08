@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, Http404
 
 from .models import Candidate, Poll, Choice
 
@@ -16,6 +16,15 @@ def index(request):
     # return HttpResponse(str)
     context={'candidates':candidates}
     return render(request, 'elections/index.html', context)
+
+def candidates(request, name):
+    candidate = get_object_or_404(Candidate, name=name)
+    # try:
+    #     candidate=Candidate.objects.get(name=name)
+    # except:
+    #     # return HttpResponseNotFound("없는 페이지 입니다.")
+    #     raise Http404
+    return HttpResponse(candidate.name)
 
 def areas(request, area):
     # return HttpResponse(area)

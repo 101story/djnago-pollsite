@@ -6,11 +6,8 @@ from . import views
 urlpatterns = [
     # 빈경로인 경우 views.index 함수가 실행되도록 해라
     path('', views.index, name='index'),
-<<<<<<< HEAD
     url(r'^areas/(?P<area>[가-힣]+)/$', views.areas),
     url(r'^areas/(?P<area>[가-힣]+)/results$', views.results),
-=======
-    url(r'^areas/(?P<area>.+)/$', views.areas),
->>>>>>> 092de09f46b700174268e7cf56189b4019d7f23d
-    url(r'^polls/(?P<poll_id>\d+)/$', views.polls)
+    url(r'^polls/(?P<poll_id>\d+)/$', views.polls),
+    url(r'^candidates/(?P<name>[가-힣]+)/$', views.candidates)
 ]
