@@ -1231,13 +1231,191 @@ Page not found(404)
 템플릿 상속
 -------------------------
 
+##### 1. layout.html 설정
+	<!-- C:\Code\mysite\elections\templates\elections\layout.html-->
 
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+	  <title>{% block title %}{% endblock %}</title>
+	  <meta charset="utf-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+	{% block content %}{% endblock %}
+	</body>
+	</html>
+
+##### 2. 각 html파일에 layout.html 상속받기
+
+1. index.html
+	<!DOCTYPE html>부터 </head>까지 삭제
+	<body>, </body>, </html> 태그 제거
+	<!-- C:\Code\mysite\elections\templates\elections\index.html-->
+
+	{% extends "elections/layout.html" %}
+	{% block title %}
+	선거 후보
+	{% endblock %}
+
+	{% block content %}
+
+	<!-- 기존 코드 유지.
+	    <div class = "container">로 시작하고 </table>로 끝납니다.-->
+
+	{% endblock %}
+
+2. area.html
+	<!DOCTYPE html>부터 </head>까지 삭제
+	<body>, </body>, </html> 태그 제거
+	<!-- C:\Code\mysite\elections\templates\elections\area.html-->
+	{% extends "elections/layout.html" %}
+
+	{% block title %}
+	{{area}}
+	{% endblock %}
+
+	{% block content %}
+
+	<!-- 기존 코드 유지.
+	    <div class = "container">로 시작하고 </div>로 끝납니다.-->
+
+	{% endblock %}
+
+3. result.html
+	<!DOCTYPE html>부터 </head>까지 삭제
+	<body>, </body>, </html> 태그 제거
+	<!-- C:\Code\mysite\elections\templates\elections\result.html-->
+	{% extends "elections/layout.html" %}
+
+	{% block title %}
+	{{area}} 여론조사 결과
+	{% endblock %}
+
+	{% block content %}
+
+	<!-- 기존 코드 유지.
+	    <div class = "container">로 시작하고 </div>로 끝납니다.-->
+
+	{% endblock %}
 
 
 
 -------------------------
+네비게이션바 추가하기
 -------------------------
 
-==============================
+네비게이션바 코드
+
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">사이트명</a>
+    </div>
+</nav>
+
+1. layout 추가하기
+	<!-- C:\Code\mysite\elections\templates\elections\layout.html -->
+
+	<!--기존 코드 -->
+	<body>
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href="{% url 'elections:home' %}">사이트명</a>
+	    </div>
+	</nav>
+	<!--기존 코드 -->
+
+2. url설정
+	# C:\Code\mysite\elections\urls.py
+
+	# 기존 코드 유지
+
+	app_name = 'elections'
+	urlpatterns = [
+	    url(r'^$', views.index, name = 'home')
+	    # 기존 코드 유지
+	]
+
+-------------------------
+파일 사용하기
+-------------------------
+
+중요 static 파일은 DEBUG = true일 때 의도한대로 쓸 수 있습니다.
+C:\Code\mysite\mysite\settings.py 에서 DEBUG =true로 되어 있는지 확인해주시기 바랍니다.
+
+1. C:\Code\mysite\elections\static\elections 경로에 favicon 그림 파일 저장하기
+	파일 다운로드 : 클릭하세요
+
+2. 경로 추가하기
+	<!-- C:\Code\mysite\elections\layout.html -->
+	{% load staticfiles %} <!-- 추가 -->
+
+	<!--기존는 유지하면서, <head> 태그 아래에 다음을 추가해주세요-->
+	    <link rel ="shortcut icon" type = "image/x-icon" href="{% static 'elections/favicon.ico' %}" />
+
 
 ==============================
+서버띄우기 - AWS
+==============================
+
+아마존 가입하고
+
+EC2 선택
+	launch instance
+		ubuntu select
+	security 방화벽 설정
+	raunch
+		create a new key pair
+
+터미널로 aws 접속
+
+git 으로 source 코드 가져오기
+
+설정 후 security 로 TCP 열어 주기
+
+
+**아마존웹서비스 계정을 생성한 후 본 강의를 따라해 주세요.
+
+1. 인스턴스 생성
+	1. 인스턴스 선택
+	EC2 - Launch Instance - Ubuntu 14.04 - t2.micro type - Review and Launch - Launch
+
+	2. key pair 생성
+	key pair는 다시 다운 받을 수 없습니다. 잘 관리해 주세요.
+	Select an existing key pair or create a new key pair 창이 나타나면 Create a new key pair 선택 - Key pair name은 DjangoServer로 입력 - Download Key Pair - Launch Instance
+
+2. 접속
+putty와 puttygen 다운로드 링크
+
+	1. putty gen으로 설정
+	puttygen실행 - Load - 위에서 다운로드한 keypair(DjangoServer.pem) 파일 선택 - Save private key - 같은이름, ppk확장자로 저장
+
+	2. putty로 접속
+	hostname : ubuntu@과 Instance에 Connect 버튼을 누르면 나오는 Public DNS 아래 내용물을 붙여 씀
+	Port : 22
+	Connection type : SSH
+
+	좌측 Connection-SSH-Auth-Browse-putty gen에서 만들었던 ppk 확장자 선택
+
+3. 접속 전 보안 설정
+EC2 - Security Groups - Inbound Edit - Add Rule(Custom TCP Rule / TCP / 8000 / Anywhere)
+
+4. Git으로 코드 불러와 실행하기
+	1. Git과 django 설치
+	sudo apt-get update
+	sudo apt-get install git
+	sudo apt-get install python3-pip
+	sudo pip3 install django
+
+	2. Git에서 코드 불러와 실행
+	git clone <Git 주소>
+	manage.py가 있는 디렉토리로 이동
+	python3 manage.py runserver 0.0.0.0:8000
+
+	3. 브라우저에 접속
+	브라우저에서 EC2 - Running instances - Public DNS뒤에 :8000붙인 주소로 접속
