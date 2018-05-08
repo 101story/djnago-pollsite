@@ -773,6 +773,7 @@ ___________________
 	# C:\Code\mysite\settings.py
 
 	#기존 코드 유지
+<<<<<<< HEAD
 
 	DATABASES = {
 	    #유지해주세요
@@ -782,7 +783,17 @@ ___________________
 	LANGUAGE_CODE = 'ko-kr' #추가
 
 	#기존 코드 유지
+=======
 
+	DATABASES = {
+	    #유지해주세요
+	}
+	DATABASE_OPTIONS = {'charset': 'utf8'} #추가
+	TIME_ZONE = 'Asia/Seoul' #추가
+	LANGUAGE_CODE = 'ko-kr' #추가
+>>>>>>> 092de09f46b700174268e7cf56189b4019d7f23d
+
+	#기존 코드 유지
 
 
 -------------------------
@@ -1128,9 +1139,123 @@ def results(request, area):
 
 
 -------------------------
+여론조사 결과저장
+-------------------------
+
+투표 결과를 DB에 저장
+
+##### 웹사이트에서 결과를 전달
+	- action : 선택 결과가 전달될 url을 지정합니다.
+	- value : 전달할 값을 지정합니다
+
+	<!-- C:\Code\mysite\templates\elections\area.html -->
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+	  <title>{{area}}</title>
+	  <meta charset="utf-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+	  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+	<div class="container">
+	<h1>지역구</h1>
+	<br>
+	{% if poll %}
+	    <table class="table table-striped">
+	        <thead>
+	        <tr>
+	            <td><B>이름</B></td>
+	            <td><B>소개</B></td>
+	            <td><B>기호</B></td>
+	            <td><B>지지하기</B></td>
+	        </tr>
+	        </thead>
+	        <tbody>
+	        {% for candidate in candidates %}
+	        <tr>
+	            <td> {{candidate.name}}</td>
+	            <td> {{candidate.introduction}}</td>
+	            <td> 기호{{candidate.party_number}}번 </td>
+	            <td>
+	                <form action = "/polls/{{poll.id}}/" method = "post">
+	                {% csrf_token %}
+	                    <button name="choice" value="{{candidate.id}}">선택</button>
+	                </form>
+	            </td>
+	        </tr>
+	        {% endfor %}
+	        <tbody>
+	    </table>
+	{% else %}
+	여론조사가 없습니다
+	{% endif %}
+	</div>
+	</body>
+
+##### action에서 지정한 url을 등록
+	# C:\Code\mysite\elections\urls.py
+
+	# 코드 유지
+
+	urlpatterns = [
+	    # 기존 url 유지
+	    url(r'^polls/(?P<poll_id>\d+)/$', views.polls), #이 url에 대한 요청을 views.polls가 처리하게 만듭니다.
+	]
+
+###### view.polls를 구현
+	# C:\Code\mysite\elections\views.py
+	#기존 코드 유지
+
+	def polls(request, poll_id):
+	    poll = Poll.objects.get(pk = poll_id)
+	    selection = request.POST['choice']
+
+	    try:
+	        choice = Choice.objects.get(poll_id = poll.id, candidate_id = selection)
+	        choice.votes += 1
+	        choice.save()
+	    except:
+	        #최초로 투표하는 경우, DB에 저장된 Choice객체가 없기 때문에 Choice를 새로 생성합니다
+	        choice = Choice(poll_id = poll.id, candidate_id = selection, votes = 1)
+	        choice.save()
+
+	    return HttpResponse("finish")
+
+
+-------------------------
+여론조사 결과보기 - http redirect 하기
+-------------------------
+
+
+
+
+
+-------------------------
+여론조사 결과보기 - 후보 표시하기
+-------------------------
+
+
+
+
+
+-------------------------
+여론조사 결과보기 - Dictionary 로 데이터 정리
+-------------------------
+
+
+
+
 
 -------------------------
 
+<<<<<<< HEAD
+=======
+-------------------------
+
+>>>>>>> 092de09f46b700174268e7cf56189b4019d7f23d
 
 
 -------------------------
