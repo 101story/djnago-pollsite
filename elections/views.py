@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, Http404
 
+
 from .models import Candidate, Poll, Choice
 
 import datetime
@@ -25,6 +26,17 @@ def candidates(request, name):
     #     # return HttpResponseNotFound("없는 페이지 입니다.")
     #     raise Http404
     return HttpResponse(candidate.name)
+
+def newcandidate(request):
+    if request.method=="POST":
+        form=PostForm(request.POST)
+        if form.is_valid():
+            #save
+            return redirect('election:home')
+    else:
+        form=PostForm()
+        return render(request, 'elections/newcandidate.html', {"form":form})
+
 
 def areas(request, area):
     # return HttpResponse(area)

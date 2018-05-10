@@ -25,11 +25,12 @@
             <td>기호{{candidate.party_number}}번</td>
         </tr>
         {% endfor %}
-        <form action = "/polls/{{poll.id}}/" method = "post">
-        {% csrf_token %}
-            <button name="choice" value="{{candidate.id}}"></button>
-        </form>
+
         <tbody>
     </table>
+
+    <!-- <button name="후보등록" value="후보등록">후보등록</button> -->
+    <a href="{% url 'elections:newcandidate' %}">후보등록</a>
+</div>
 
 {% endblock %}
