@@ -1,7 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, Http404
 
-
+from .forms import PostForm
 from .models import Candidate, Poll, Choice
 
 import datetime
@@ -28,11 +28,19 @@ def candidates(request, name):
     return HttpResponse(candidate.name)
 
 def newcandidate(request):
+    # 새 후보 저장
     if request.method=="POST":
         form=PostForm(request.POST)
+
         if form.is_valid():
-            #save
+            post=form.save(commit=False)
+            # 필드에는 없지만 저장해야 하는 값이 있는 경우
+            # post.author=request.user
+            # post.published_date=timezone.now()
+            post.save()
+
             return redirect('election:home')
+    # 새 후보 작성
     else:
         form=PostForm()
         return render(request, 'elections/newcandidate.html', {"form":form})

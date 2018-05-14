@@ -5,6 +5,7 @@
 
 {% block content %}
 <div class="container newcandidate">
+    <h1>New Candidate</h1>
     <form method="POST" class="post-form">
         {%csrf_token%}
         {{form.as_p}}
