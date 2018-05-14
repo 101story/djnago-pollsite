@@ -34,13 +34,13 @@ def newcandidate(request):
         form=PostForm(request.POST)
 
         if form.is_valid():
-            post=form.save(commit=False)
+            candidate=form.save(commit=False)
             # 필드에는 없지만 저장해야 하는 값이 있는 경우
             # post.author=request.user
             # post.published_date=timezone.now()
-            post.save()
+            candidate.save()
 
-            return redirect('election:home')
+            return redirect('elections:candidate_detail', pk=candidate.pk)
     # 새 후보 작성
     else:
         form=PostForm()
