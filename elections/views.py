@@ -40,12 +40,24 @@ def newcandidate(request):
             # post.published_date=timezone.now()
             candidate.save()
 
-            return redirect('elections:candidate_detail', pk=candidate.pk)
+            return redirect('elections:candidate', pk=candidate.pk)
     # 새 후보 작성
     else:
         form=PostForm()
-        return render(request, 'elections/newcandidate.html', {"form":form})
+        return render(request, 'elections/candidate_edit.html', {"form":form})
 
+def editcandidate(request, pk):
+    candidate = get_object_or_404(Candidate, pk=pk)
+
+    if request.method=="POST":
+        form = PostForm(request.POST, instance=candidate)
+
+        if form.is_valid():
+            form.save();
+            return redirect('elections:candidate', pk=candidate.pk)
+    else:
+        form=PostForm(instance=candidate)
+        return render(request, 'elections/candidate_edit.html', {'form':form})
 
 def areas(request, area):
     # return HttpResponse(area)

@@ -4,6 +4,8 @@
 {% endblock %}
 
 {% block content %}
+<a class="btn btn-default" href="{% url 'elections:editcandidate' pk=candidate.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+
 <div class="content">
     <p> 이름 : {{ candidate.name }}</p>
     <p> 소개 : {{ candidate.introduction }}</p>
