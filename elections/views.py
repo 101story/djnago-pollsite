@@ -18,14 +18,15 @@ def index(request):
     context={'candidates':candidates}
     return render(request, 'elections/index.html', context)
 
-def candidates(request, name):
-    candidate = get_object_or_404(Candidate, name=name)
+def candidate(request, pk):
+    candidate = get_object_or_404(Candidate, pk=pk)
     # try:
     #     candidate=Candidate.objects.get(name=name)
     # except:
     #     # return HttpResponseNotFound("없는 페이지 입니다.")
     #     raise Http404
-    return HttpResponse(candidate.name)
+    # return HttpResponse(candidate.name)
+    return render(request, 'elections/candidate_detail.html', {'candidate':candidate})
 
 def newcandidate(request):
     # 새 후보 저장

@@ -1,0 +1,13 @@
+{% extends "elections/layout.html" %}
+{% block title %}
+후보 정보
+{% endblock %}
+
+{% block content %}
+<div class="content">
+    <p> 이름 : {{ candidate.name }}</p>
+    <p> 소개 : {{ candidate.introduction }}</p>
+    <p> 지역 : {{ candidate.area }}</p>
+    <p> 번호 : {{ candidate.party_number}}</p>
+</div>
+{% endblock %}
